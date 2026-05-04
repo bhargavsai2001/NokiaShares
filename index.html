@@ -11,7 +11,7 @@
 
   html, body {
     width: 100%; height: 100%;
-    background: #0a0f1e;
+    background: transparent;
     font-family: 'Inter', 'Roboto', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -20,22 +20,27 @@
     width: 100%;
     height: 100%;
     min-height: 110px;
-    padding: 5px;
+    padding: 4px;
     display: flex;
     align-items: stretch;
   }
 
   .widget-card {
     flex: 1;
-    background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+    background: rgba(12, 17, 30, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,0.10);
     border-radius: 18px;
-    padding: 13px 15px 11px;
+    padding: 13px 15px;
     display: flex;
     flex-direction: column;
     gap: 5px;
     position: relative;
     overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.09),
+      0 8px 32px rgba(0,0,0,0.55);
   }
 
   .widget-card::before {
@@ -46,15 +51,17 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
   }
 
+  /* Subtle ambient glow bottom-right */
   .widget-card::after {
     content: '';
     position: absolute;
-    bottom: -30px; right: -20px;
-    width: 100px; height: 100px;
-    background: radial-gradient(circle, rgba(34,197,94,0.08), transparent 70%);
+    bottom: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(34,197,94,0.10), transparent 70%);
     pointer-events: none;
   }
 
+  /* ─── Title row ─── */
   .title-row {
     display: flex;
     align-items: center;
@@ -64,21 +71,26 @@
   .status-dot {
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: #555;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34,197,94,0.7);
     flex-shrink: 0;
-    transition: background 0.4s, box-shadow 0.4s;
+    transition: background 0.3s, box-shadow 0.3s;
   }
-  .status-dot.live  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.7); }
-  .status-dot.error { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.7); }
+
+  .status-dot.error {
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239,68,68,0.7);
+  }
 
   .title-text {
     font-size: 10.5px;
     font-weight: 600;
-    color: rgba(255,255,255,0.40);
+    color: rgba(255,255,255,0.45);
     letter-spacing: 0.09em;
     text-transform: uppercase;
   }
 
+  /* ─── Main content row ─── */
   .main-row {
     display: flex;
     align-items: flex-start;
@@ -87,6 +99,7 @@
     gap: 8px;
   }
 
+  /* ─── Left column ─── */
   .left-col {
     display: flex;
     flex-direction: column;
@@ -97,7 +110,7 @@
   }
 
   .gross-value {
-    font-size: 26px;
+    font-size: 27px;
     font-weight: 700;
     color: #22c55e;
     letter-spacing: -0.6px;
@@ -113,15 +126,21 @@
     gap: 3px;
     font-size: 11.5px;
     font-weight: 500;
+    flex-wrap: nowrap;
     white-space: nowrap;
   }
 
-  .arrow-icon       { font-size: 10px; line-height: 1; }
-  .arrow-icon.up    { color: #22c55e; }
-  .arrow-icon.down  { color: #ef4444; }
-  .chg.up           { color: #22c55e; }
-  .chg.down         { color: #ef4444; }
+  .arrow-icon {
+    font-size: 10px;
+    line-height: 1;
+  }
+  .arrow-icon.up  { color: #22c55e; }
+  .arrow-icon.down { color: #ef4444; }
 
+  .change-amount.up  { color: #22c55e; }
+  .change-amount.down { color: #ef4444; }
+
+  /* ─── Right column ─── */
   .right-col {
     display: flex;
     flex-direction: column;
@@ -142,7 +161,7 @@
   .price-eur {
     font-size: 13px;
     font-weight: 500;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255,255,255,0.72);
     letter-spacing: -0.2px;
     white-space: nowrap;
   }
@@ -152,11 +171,11 @@
     font-weight: 400;
     color: rgba(255,255,255,0.28);
     text-align: right;
-    line-height: 1.5;
+    line-height: 1.45;
     letter-spacing: 0.02em;
-    white-space: pre-line;
   }
 
+  /* ─── Skeleton loader ─── */
   .skel {
     display: inline-block;
     border-radius: 4px;
@@ -164,15 +183,16 @@
     animation: shimmer 1.5s ease-in-out infinite;
     vertical-align: middle;
   }
+
   @keyframes shimmer {
-    0%,100% { opacity: 0.35; }
-    50%      { opacity: 0.75; }
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
   }
 
-  .err {
-    font-size: 10.5px;
+  /* ─── Error ─── */
+  .err-txt {
+    font-size: 11px;
     color: rgba(239,68,68,0.85);
-    line-height: 1.4;
   }
 </style>
 </head>
@@ -182,28 +202,28 @@
   <div class="widget-card">
 
     <div class="title-row">
-      <div class="status-dot" id="dot"></div>
+      <div class="status-dot" id="statusDot"></div>
       <span class="title-text">Nokia Share</span>
     </div>
 
     <div class="main-row">
       <div class="left-col">
-        <div class="gross-value" id="gross">
-          <span class="skel" style="width:115px;height:25px;">&nbsp;</span>
+        <div class="gross-value" id="grossValue">
+          <span class="skel" style="width:115px;height:26px;">&nbsp;</span>
         </div>
-        <div class="change-row" id="chgRow">
-          <span class="skel" style="width:90px;height:12px;">&nbsp;</span>
+        <div class="change-row" id="changeRow">
+          <span class="skel" style="width:88px;height:12px;">&nbsp;</span>
         </div>
       </div>
 
       <div class="right-col">
-        <div class="price-usd" id="pUsd">
+        <div class="price-usd" id="priceUsd">
           <span class="skel" style="width:56px;height:15px;">&nbsp;</span>
         </div>
-        <div class="price-eur" id="pEur">
+        <div class="price-eur" id="priceEur">
           <span class="skel" style="width:50px;height:13px;">&nbsp;</span>
         </div>
-        <div class="last-updated" id="updated">Fetching...</div>
+        <div class="last-updated" id="lastUpdated">Fetching…</div>
       </div>
     </div>
 
@@ -211,106 +231,84 @@
 </div>
 
 <script>
-var SHARES   = 1000;
-var FINN_KEY = 'clbn621r01qp535svssgclbn621r01qp535svst0';
-var FX_KEY   = '648176f0273f327e98cd7bf9';
-var SYMBOL   = 'NOK';
+  const SHARES    = 1000;
+  const FINN_KEY  = 'clbn621r01qp535svssgclbn621r01qp535svst0';
+  const FX_KEY    = '648176f0273f327e98cd7bf9';
+  const SYMBOL    = 'NOK';
 
-function el(id) { return document.getElementById(id); }
+  function fmtINR(val) {
+    return '₹' + Math.round(val).toLocaleString('en-IN');
+  }
 
-function fmtINR(v) {
-  return '\u20B9' + Math.round(v).toLocaleString('en-IN');
-}
+  function fmtNum(n, d) {
+    return n.toFixed(d);
+  }
 
-function nowStr() {
-  var d  = new Date();
-  var dt = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'2-digit' });
-  var tm = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
-  return dt + '\n' + tm;
-}
+  function nowStr() {
+    const d   = new Date();
+    const dt  = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+    const tm  = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return dt + '\n' + tm;
+  }
 
-/* Fetch with automatic CORS-proxy fallback */
-function safeFetch(url) {
-  return fetch(url)
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .catch(function() {
-      /* fallback: route through allorigins proxy */
-      var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-      return fetch(proxy)
-        .then(function(r) {
-          if (!r.ok) throw new Error('Proxy HTTP ' + r.status);
-          return r.json();
-        })
-        .then(function(wrapper) {
-          return JSON.parse(wrapper.contents);
-        });
-    });
-}
+  async function fetchData() {
+    try {
+      const [qRes, fxRes] = await Promise.all([
+        fetch('https://finnhub.io/api/v1/quote?symbol=' + SYMBOL + '&token=' + FINN_KEY),
+        fetch('https://v6.exchangerate-api.com/v6/' + FX_KEY + '/latest/USD')
+      ]);
 
-function setError(msg) {
-  el('gross').innerHTML  = '<span class="err">Error loading</span>';
-  el('chgRow').innerHTML = '<span class="err">' + (msg || 'Check connection') + '</span>';
-  el('pUsd').textContent = '-';
-  el('pEur').textContent = '-';
-  el('updated').textContent = 'Failed ' + new Date().toLocaleTimeString('en-IN',{ hour:'2-digit', minute:'2-digit', hour12:true });
-  el('dot').className    = 'status-dot error';
-}
+      if (!qRes.ok || !fxRes.ok) throw new Error('API error');
 
-function refresh() {
-  el('dot').className = 'status-dot';
+      const quote  = await qRes.json();
+      const fx     = await fxRes.json();
 
-  var finnURL = 'https://finnhub.io/api/v1/quote?symbol=' + SYMBOL + '&token=' + FINN_KEY;
-  var fxURL   = 'https://v6.exchangerate-api.com/v6/' + FX_KEY + '/latest/USD';
+      if (!quote.c || quote.c === 0) throw new Error('No price data');
 
-  Promise.all([ safeFetch(finnURL), safeFetch(fxURL) ])
-    .then(function(results) {
-      var quote = results[0];
-      var fx    = results[1];
+      const priceUSD  = quote.c;
+      const prevUSD   = quote.pc;
+      const usdToINR  = fx.conversion_rates.INR;
+      const usdToEUR  = fx.conversion_rates.EUR;
 
-      if (!quote || !quote.c || quote.c === 0) {
-        throw new Error('No price data');
-      }
-      if (!fx || !fx.conversion_rates) {
-        throw new Error('No FX data');
-      }
+      const priceEUR  = priceUSD * usdToEUR;
+      const grossINR  = priceUSD * SHARES * usdToINR;
+      const prevINR   = prevUSD  * SHARES * usdToINR;
+      const chgINR    = grossINR - prevINR;
+      const chgPct    = (chgINR / prevINR) * 100;
 
-      var priceUSD = quote.c;
-      var prevUSD  = quote.pc;
-      var toINR    = fx.conversion_rates.INR;
-      var toEUR    = fx.conversion_rates.EUR;
+      const isUp = chgINR >= 0;
+      const dir  = isUp ? 'up' : 'down';
+      const arr  = isUp ? '▲' : '▼';
 
-      var priceEUR = priceUSD * toEUR;
-      var grossINR = priceUSD * SHARES * toINR;
-      var prevINR  = prevUSD  * SHARES * toINR;
-      var chgINR   = grossINR - prevINR;
-      var chgPct   = (chgINR / prevINR) * 100;
+      document.getElementById('grossValue').textContent = fmtINR(grossINR);
 
-      var isUp = chgINR >= 0;
-      var dir  = isUp ? 'up' : 'down';
-      var arr  = isUp ? '\u25B2' : '\u25BC';
+      document.getElementById('changeRow').innerHTML =
+        `<span class="arrow-icon ${dir}">${arr}</span>` +
+        `<span class="change-amount ${dir}">${fmtINR(Math.abs(chgINR))} (${Math.abs(chgPct).toFixed(2)}%)</span>`;
 
-      el('gross').textContent = fmtINR(grossINR);
+      document.getElementById('priceUsd').textContent = '$' + fmtNum(priceUSD, 3);
+      document.getElementById('priceEur').textContent = '€' + fmtNum(priceEUR, 3);
+      document.getElementById('lastUpdated').textContent = nowStr();
 
-      el('chgRow').innerHTML =
-        '<span class="arrow-icon ' + dir + '">' + arr + '</span>' +
-        '<span class="chg ' + dir + '">' + fmtINR(Math.abs(chgINR)) + ' (' + Math.abs(chgPct).toFixed(2) + '%)</span>';
+      const dot = document.getElementById('statusDot');
+      dot.classList.remove('error');
 
-      el('pUsd').textContent    = '$' + priceUSD.toFixed(3);
-      el('pEur').textContent    = '\u20AC' + priceEUR.toFixed(3);
-      el('updated').textContent = nowStr();
-      el('dot').className       = 'status-dot live';
-    })
-    .catch(function(err) {
-      setError(err.message ? err.message.slice(0, 35) : 'Check connection');
-      console.error('[Nokia Widget] ' + (err.message || err));
-    });
-}
+    } catch (err) {
+      document.getElementById('grossValue').innerHTML   = '<span class="err-txt">Error loading</span>';
+      document.getElementById('changeRow').innerHTML    = '<span class="err-txt">Check connection</span>';
+      document.getElementById('priceUsd').textContent   = '—';
+      document.getElementById('priceEur').textContent   = '—';
+      document.getElementById('lastUpdated').textContent = 'Failed';
 
-refresh();
-setInterval(refresh, 5 * 60 * 1000);
+      const dot = document.getElementById('statusDot');
+      dot.classList.add('error');
+    }
+  }
+
+  fetchData();
+
+  // Auto-refresh every 5 minutes
+  setInterval(fetchData, 5 * 60 * 1000);
 </script>
 
 </body>
